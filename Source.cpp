@@ -1,70 +1,41 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <iostream>
-#include <iomanip>
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WinSock2.h>
-#include <process.h>
 #include "classes.h"
 using namespace std;
-char srcX;
+char buf[30];
+char str[30];
 
-void ThreadFunc(void* client_socket)
-{
-	MainMenu(client_socket);
-	cout << "Client succesfully disconnected" << endl;
-}
 int main()
 {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
+	Menu menu;
 	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSADATA wsaData;
-	sockaddr_in localAddr;
-	localAddr.sin_family = AF_INET;
-	localAddr.sin_port = htons(1280);
-	localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	sockaddr_in destAddr;
 	if (WSAStartup(wVersionRequested, &wsaData))
 	{
 		cout << "Error starting up" << endl;
 		return WSAGetLastError();
 	}
-	cout << "WSAStartup succesfull" << endl;
 	SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
-	if (s == INVALID_SOCKET)
+	destAddr.sin_family = AF_INET;
+	destAddr.sin_port = htons(1280);
+	destAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	if (connect(s, (sockaddr*)&destAddr, sizeof(destAddr))!=0)
 	{
-		cout << "Error creating socket" << endl;
+		cout << "Connection error";
 		return WSAGetLastError();
 	}
-	cout << "Socket created succesfully" << endl;
-	if (bind(s, (struct sockaddr*)&localAddr, sizeof(localAddr)) == SOCKET_ERROR)
-	{
-		cout << "Error binding" << endl;
-		return WSAGetLastError();
-	}
-	cout << "Binding complete" << endl;
-	if (listen(s, 5) == SOCKET_ERROR)
-	{
-		cout << "Error listening" << endl;
-		return WSAGetLastError();
-	}
-	cout << "Recieve ready" << endl;
 	while (true)
 	{
-		SOCKET clientSocket;
-		sockaddr_in clientAddr;
-		int clientAddrSize = sizeof(clientAddr);
-		clientSocket = accept(s, (sockaddr*)&clientAddr, &clientAddrSize);
-		if (clientSocket == SOCKET_ERROR)
+		switch (menu.CreateMenu("Вход*Регистрация*Выход*"))
 		{
-			cout << "Connection corrupted" << endl;
-			cout << WSAGetLastError();
+		case 1: Login(s); break;
+		case 2: Register(s); break;
+		case 3: Disconnect(s); break;
 		}
-		else
-		{
-			cout << "Client connected" << endl;
-			_beginthread(ThreadFunc, 0, (void*)clientSocket);
-		}
-
 	}
+	closesocket(s);
 	WSACleanup();
-	return 0;
 }
