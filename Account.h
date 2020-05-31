@@ -1,30 +1,38 @@
 #pragma once
+#include "User.h"
+#include "Expert.h"
 #include <iostream>
-#include <conio.h>
+#include <vector>
+#include <fstream>
 using namespace std;
 class Account
 {
 public:
 	Account() {}
 	~Account() {}
-	string getUsername()
+	void fscan();
+	void fprint();
+	string login();
+	void UsernameSet(char *);
+	void PasswordSet(char*);
+	string UsernameGet()
 	{
-		return username;
+		return CurrUsername;
 	}
-	string getPassword()
+	string PermissionsGet()
 	{
-		return password;
+		return CurrPermissions;
 	}
-	string getPermissions()
+	int getAmountOfUsers()
 	{
-		return permissions;
+		return user.size();
 	}
-	void setPassword(char* str);
-	void setUsername();
-	void setPermissions(char* str);
-	void setPermissions(const char* str);
+	vector<User> user;
+	vector<Expert> expert;
 private:
-	string username;
-	string password;
-	string permissions;
+	string CurrUsername;
+	string CurrPassword;
+	string CurrPermissions;
+	int key = 0;
 };
+
